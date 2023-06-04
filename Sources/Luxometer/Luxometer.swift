@@ -4,11 +4,15 @@ import AVKit
 
 @available(iOS 11.1, *)
 public class Luxometer : NSObject, AVCaptureVideoDataOutputSampleBufferDelegate{
-    public var lux : Int = 0
+    public var capturedIlluminance : (Int) -> ()
     private var permissionGranted = false
     private let captureSession = AVCaptureSession()
     private let sessionQueue = DispatchQueue(label: "sessionQueue")
-
+    
+    init(capturedIlluminance : @escaping (Int) -> ()){
+        self.capturedIlluminance = capturedIlluminance
+    }
+    
     
     public func startMeasurement(){
         checkPermission()
@@ -28,18 +32,17 @@ public class Luxometer : NSObject, AVCaptureVideoDataOutputSampleBufferDelegate{
     
     private func checkPermission() {
         switch AVCaptureDevice.authorizationStatus(for: .video) {
-            case .authorized: // The user has previously granted access to the camera.
-                permissionGranted = true
-                
-            case .notDetermined: // The user has not yet been asked for camera access.
-                requestPermission()
-                
-        // Combine the two other cases into the default case
+        case .authorized:
+            permissionGranted = true
+            
+        case .notDetermined:
+            requestPermission()
+            
         default:
             permissionGranted = false
         }
     }
-
+    
     
     private func setupCaptureSession() {
         let videoOutput = AVCaptureVideoDataOutput()
@@ -68,13 +71,10 @@ public class Luxometer : NSObject, AVCaptureVideoDataOutputSampleBufferDelegate{
     }
     
     public func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
-        
         let rawMetadata = CMCopyDictionaryOfAttachments(allocator: nil, target: sampleBuffer, attachmentMode: CMAttachmentMode(kCMAttachmentMode_ShouldPropagate))
         let metadata = CFDictionaryCreateMutableCopy(nil, 0, rawMetadata) as NSMutableDictionary
         let exifData = metadata.value(forKey: "{Exif}") as? NSMutableDictionary
         let brightness : Double = exifData?["BrightnessValue"] as! Double
-        self.lux = Int(70*pow(2, brightness))
+        capturedIlluminance(Int(70*pow(2, brightness)))
     }
-
-    
 }
