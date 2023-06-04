@@ -4,16 +4,12 @@ import AVKit
 
 @available(iOS 11.1, *)
 public class Luxometer : NSObject, AVCaptureVideoDataOutputSampleBufferDelegate{
-    public var capturedIlluminance : (Int) -> ()
+    public var capturedIlluminance : ((Int) -> ())?
     private var permissionGranted = false
     private let captureSession = AVCaptureSession()
     private let sessionQueue = DispatchQueue(label: "sessionQueue")
-    
-    public init(capturedIlluminance : @escaping (Int) -> ()){
-        self.capturedIlluminance = capturedIlluminance
-    }
-    
-    
+
+
     public func startMeasurement(){
         checkPermission()
         sessionQueue.async { [unowned self] in
@@ -75,6 +71,12 @@ public class Luxometer : NSObject, AVCaptureVideoDataOutputSampleBufferDelegate{
         let metadata = CFDictionaryCreateMutableCopy(nil, 0, rawMetadata) as NSMutableDictionary
         let exifData = metadata.value(forKey: "{Exif}") as? NSMutableDictionary
         let brightness : Double = exifData?["BrightnessValue"] as! Double
-        capturedIlluminance(Int(70*pow(2, brightness)))
+        let illuminance = Int(70*pow(2, brightness))
+        if let captured = self.capturedIlluminance{
+            captured(illuminance)
+        }
+        else{
+            print("Illuminance is \(illuminance) lux. Set capturedIlluminance to your Luxometer instance to get the value and avoid this message.")
+        }
     }
 }
