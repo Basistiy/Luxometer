@@ -9,7 +9,7 @@ public class Luxometer : NSObject, AVCaptureVideoDataOutputSampleBufferDelegate{
     private let captureSession = AVCaptureSession()
     private let sessionQueue = DispatchQueue(label: "sessionQueue")
     
-    init(capturedIlluminance : @escaping (Int) -> ()){
+    public init(capturedIlluminance : @escaping (Int) -> ()){
         self.capturedIlluminance = capturedIlluminance
     }
     
