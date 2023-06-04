@@ -4,7 +4,7 @@ import AVKit
 
 @available(iOS 11.1, *)
 public class Luxometer : NSObject, AVCaptureVideoDataOutputSampleBufferDelegate{
-    var lux : Int = 0
+    public var lux : Int = 0
     private var permissionGranted = false
     private let captureSession = AVCaptureSession()
     private let sessionQueue = DispatchQueue(label: "sessionQueue")
@@ -43,10 +43,16 @@ public class Luxometer : NSObject, AVCaptureVideoDataOutputSampleBufferDelegate{
     
     private func setupCaptureSession() {
         let videoOutput = AVCaptureVideoDataOutput()
-        guard permissionGranted else { return }
+        guard permissionGranted else {
+            print("Luxometer does not have camera permission")
+            return
+            
+        }
         let discovery = AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInWideAngleCamera], mediaType: .video, position: .back)
         print(discovery.devices)
-        guard let videoDevice = AVCaptureDevice.default(.builtInTrueDepthCamera,for: .video, position: .front) else { return }
+        guard let videoDevice = AVCaptureDevice.default(.builtInTrueDepthCamera,for: .video, position: .front) else {
+            print("Luxometer cannot get access to the built in True Depth front camera")
+            return }
         guard let videoDeviceInput = try? AVCaptureDeviceInput(device: videoDevice) else { return }
         guard captureSession.canAddInput(videoDeviceInput) else { return }
         captureSession.addInput(videoDeviceInput)

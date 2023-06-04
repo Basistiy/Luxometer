@@ -9,7 +9,7 @@ Use the Swift Package Manager to install Luxometer.
 
 ## Usage
 
-Luxometer uses iPhone front camera so you need to add this capability to your app.
+Luxometer uses iPhone front camera so you need to add "Privacy - Camera Usage Description" description to the Info.plist file of your project.
 
 import Luxometer
 
