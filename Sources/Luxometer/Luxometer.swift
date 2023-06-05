@@ -17,7 +17,7 @@ public class Luxometer : NSObject, AVCaptureVideoDataOutputSampleBufferDelegate{
     private var cameraUsed = ""
     private var setupResult: SessionSetupResult = .success
     
-    override init() {
+    public override init() {
         super.init()
         configureSession()
         switch AVCaptureDevice.authorizationStatus(for: .video) {
