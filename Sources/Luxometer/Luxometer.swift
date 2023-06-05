@@ -4,7 +4,7 @@ import AVKit
 
 @available(iOS 13, *)
 public class Luxometer : NSObject, AVCaptureVideoDataOutputSampleBufferDelegate{
-    public var capturedIlluminance : ((Int, String) -> ())?
+    public var capturedIlluminance : ((Int) -> ())?
     public var calibrationConstant = 70.0
     @objc dynamic var videoDeviceInput: AVCaptureDeviceInput!
     private let session = AVCaptureSession()
@@ -14,7 +14,7 @@ public class Luxometer : NSObject, AVCaptureVideoDataOutputSampleBufferDelegate{
         case notAuthorized
         case configurationFailed
     }
-    private var cameraUsed = ""
+    public var cameraUsed = ""
     private var setupResult: SessionSetupResult = .success
     
     public override init() {
@@ -197,7 +197,7 @@ public class Luxometer : NSObject, AVCaptureVideoDataOutputSampleBufferDelegate{
         let brightness : Double = exifData?["BrightnessValue"] as! Double
         let illuminance = Int(calibrationConstant*pow(2, brightness))
         if let captured = self.capturedIlluminance{
-            captured(illuminance, cameraUsed)
+            captured(illuminance)
         }
         else{
             print("Illuminance is \(illuminance) lux. Set capturedIlluminance to your Luxometer instance to get the value and avoid this message.")
