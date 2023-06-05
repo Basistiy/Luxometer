@@ -5,6 +5,7 @@ import AVKit
 @available(iOS 13, *)
 public class Luxometer : NSObject, AVCaptureVideoDataOutputSampleBufferDelegate{
     public var capturedIlluminance : ((Int) -> ())?
+    public var settingsChanged : (() ->())?
     public var calibrationConstant = 70.0
     @objc dynamic var videoDeviceInput: AVCaptureDeviceInput!
     private let session = AVCaptureSession()
@@ -103,6 +104,10 @@ public class Luxometer : NSObject, AVCaptureVideoDataOutputSampleBufferDelegate{
                 return
             }
             self.cameraUsed = videoDevice.localizedName
+            if let settingsChanged = self.settingsChanged{
+                settingsChanged()
+            }
+            
             let videoDeviceInput = try AVCaptureDeviceInput(device: videoDevice)
             
             if session.canAddInput(videoDeviceInput) {
@@ -178,9 +183,11 @@ public class Luxometer : NSObject, AVCaptureVideoDataOutputSampleBufferDelegate{
                         self.session.addInput(self.videoDeviceInput)
                     }
                     self.session.commitConfiguration()
-                    DispatchQueue.main.async {
-                        self.cameraUsed = videoDevice.localizedName
+                    self.cameraUsed = videoDevice.localizedName
+                    if let settingsChanged = self.settingsChanged{
+                        settingsChanged()
                     }
+
                 } catch {
                     print("Error occurred while creating video device input: \(error)")
                 }
