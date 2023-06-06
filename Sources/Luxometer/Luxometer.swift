@@ -73,29 +73,22 @@ public class Luxometer : NSObject, AVCaptureVideoDataOutputSampleBufferDelegate{
         
         session.beginConfiguration()
         
-        /*
-         Do not create an AVCaptureMovieFileOutput when setting up the session because
-         Live Photo is not supported when AVCaptureMovieFileOutput is added to the session.
-         */
-        session.sessionPreset = .photo
-        
         // Add video input.
         do {
             var defaultVideoDevice: AVCaptureDevice?
             
-            // Choose the back dual camera, if available, otherwise default to a wide angle camera.
-            
-            if let dualCameraDevice = AVCaptureDevice.default(.builtInDualCamera, for: .video, position: .back) {
+            if let frontCameraDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .front) {
+                // Default to the front wide angle camera if available.
+                defaultVideoDevice = frontCameraDevice
+            }else if let dualCameraDevice = AVCaptureDevice.default(.builtInDualCamera, for: .video, position: .back) {
+                // Choose the back dual camera, if front camera not available.
                 defaultVideoDevice = dualCameraDevice
-            } else if let dualWideCameraDevice = AVCaptureDevice.default(.builtInDualWideCamera, for: .video, position: .back) {
+            }else if let dualWideCameraDevice = AVCaptureDevice.default(.builtInDualWideCamera, for: .video, position: .back) {
                 // If a rear dual camera is not available, default to the rear dual wide camera.
                 defaultVideoDevice = dualWideCameraDevice
-            } else if let backCameraDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back) {
+            }else if let backCameraDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back) {
                 // If a rear dual wide camera is not available, default to the rear wide angle camera.
                 defaultVideoDevice = backCameraDevice
-            } else if let frontCameraDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .front) {
-                // If the rear wide angle camera isn't available, default to the front wide angle camera.
-                defaultVideoDevice = frontCameraDevice
             }
             guard let videoDevice = defaultVideoDevice else {
                 print("Default video device is unavailable.")
