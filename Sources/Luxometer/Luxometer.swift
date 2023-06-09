@@ -4,7 +4,7 @@ import AVKit
 
 @available(iOS 13, *)
 public class Luxometer : NSObject, AVCaptureVideoDataOutputSampleBufferDelegate{
-    public var capturedIlluminance : ((Int) -> ())?
+    public var capturedIlluminance : ((Double) -> ())?
     public var settingsChanged : (() ->())?
     public var calibrationConstant = 70.0
     @objc dynamic var videoDeviceInput: AVCaptureDeviceInput!
@@ -194,8 +194,8 @@ public class Luxometer : NSObject, AVCaptureVideoDataOutputSampleBufferDelegate{
         let rawMetadata = CMCopyDictionaryOfAttachments(allocator: nil, target: sampleBuffer, attachmentMode: CMAttachmentMode(kCMAttachmentMode_ShouldPropagate))
         let metadata = CFDictionaryCreateMutableCopy(nil, 0, rawMetadata) as NSMutableDictionary
         let exifData = metadata.value(forKey: "{Exif}") as? NSMutableDictionary
-        let brightness : Double = exifData?["BrightnessValue"] as! Double
-        let illuminance = Int(calibrationConstant*pow(2, brightness))
+        let brightness : Double = exifData?["BrightnessValue"] as? Double ?? 0
+        let illuminance = calibrationConstant*pow(2, brightness)
         if let captured = self.capturedIlluminance{
             captured(illuminance)
         }
